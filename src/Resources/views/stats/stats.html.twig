@@ -1,0 +1,122 @@
+{% extends "layout.html.twig" %}
+
+{% block content %}
+
+<div class="span12">
+    <div class="widget" style="overflow:visible">
+        <div class="widget-header">
+            <i class="icon-pushpin"></i>
+            <h3>Résumé</h3>
+
+              <div class="btn-group pull-right" style="float:right;margin:4px">
+
+                <button class="btn">Période : {{ types[type] }}</button>
+                <button class="btn dropdown-toggle" data-toggle="dropdown">
+                  <span class="caret"></span>
+                </button>
+
+                <ul class="dropdown-menu" style="overflow:visible">
+                  {% for code, libelle in types %}
+                  <li><a href="{{ url('_stats', {'type': code }) }}">{{ libelle }}{% if type == code %}<i class="icon-ok"></i>{% endif %}</a></li>
+                  {% endfor %}
+                </ul>
+              </div>
+
+         </div>
+         <div class="widget-content">
+         Depuis le {{ date_from|date("d") }} {{ date_from|date("F")|trans|lower }} {{ date_from|date("Y") }} , <span class="highlighted-number">{{ total }}</span> apéros ont été organisés et ont réunis <span class="highlighted-number">{{ total_participants }}</span> participants. Comment ceux-ci sont-ils répartis ?
+        </div>
+    </div>
+</div>
+
+<div class="span4">
+    <div class="widget widget-nopad participation">
+        <div class="widget-header">
+            <i class="icon-map-marker"></i>
+            <h3>Répartition géographique</h3>
+        </div>
+         <div class="widget-content">
+            <div id="map"></div>
+        </div>
+    </div>
+</div>
+
+
+<div class="span8">
+    <div class="widget">
+        <div class="widget-header">
+            <i class="icon-user"></i>
+            <h3>Moyenne du nombre d'inscrits aux apéros, par ville</h3>
+        </div>
+         <div class="widget-content">
+           <table class="highchart"  
+                  data-graph-container-before="1" 
+                  data-graph-type="column" 
+                  data-graph-legend-disabled="1"
+                  style="display:none"
+                  data-graph-yaxis-1-title-text="Moyenne d'inscrits"
+                  data-graph-xaxis-title-text="Ville"
+                  data-graph-color-1="#6F8CCD"
+           >
+             <thead>
+               <tr>
+                 <th>Ville</th>
+                 <th>Moyenne du nombre inscrits</th>
+               </tr>
+             </thead>
+           
+             <tbody>
+           
+             {% for city in avg_participants %}
+               <tr>
+                 <td>{{ city.name }}</td>
+                 <td>{{ city.participants_avg }}</td>
+               </tr>
+             {% endfor %}
+           
+           </tbody>
+           
+           </table>
+
+        </div>
+    </div>
+</div>
+
+
+
+  <script>
+    var addressPoints = {{ geo |json_encode()|raw }};
+</script>
+
+  <script type="text/javascript">
+
+  var cloudmadeUrl = 'http://{s}.tile.cloudmade.com/BC9A493B41014CAABB98F0471D759707/997/256/{z}/{x}/{y}.png',
+      cloudmadeAttribution = 'Map data &copy; 2011 OpenStreetMap contributors, Imagery &copy; 2011 CloudMade, Points &copy 2012 LINZ',
+      cloudmade = L.tileLayer(cloudmadeUrl, {maxZoom: 17, attribution: cloudmadeAttribution}),
+      latlng = L.latLng(46.70, 2.51);
+
+    var map = L.map('map', {center: latlng, zoom: 5, layers: [cloudmade]});
+
+    var markers = L.markerClusterGroup();
+    
+    for (var i = 0; i < addressPoints.length; i++) {
+      var a = addressPoints[i];
+      var title = a[2];
+      var marker = L.marker(new L.LatLng(a[0], a[1]), { title: title });
+      marker.bindPopup(title);
+      markers.addLayer(marker);
+    }
+
+    map.addLayer(markers);
+
+  </script>
+
+
+  <script>
+
+        $('table.highchart').highchartTable();
+  </script>
+
+
+
+{% endblock %}
