@@ -28,6 +28,11 @@
                         <i class="icon-calendar"></i> <span>Liste des ap&eacute;ros</span>
                     </a>
                 </li>
+                <li{% if app.session.get('menu') == 'stats' %} class="active"{% endif %}>
+                    <a href="{{ url('_stats', {'type': 'all'}) }}">
+                        <i class="icon-signal"></i> <span>Statistiques</span>
+                    </a>
+                </li>
                 {% if not(app.session.has('member')) %}
                 <li{% if app.session.get('menu') == 'signup' %} class="active"{% endif %}>
                     <a href="{{ url('_signupmember') }}">

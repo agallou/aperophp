@@ -15,6 +15,23 @@ class Drink extends Repository
         return 'Drink';
     }
 
+    public function getCount($dateFrom)
+    {
+        $dateQuery = '';
+        if (null !== $dateFrom) {
+          $dateQuery = ' WHERE day > "' . $dateFrom . '"';
+        }
+
+        $sql = sprintf('SELECT COUNT(d.id) as count
+            FROM Drink d %s
+        ', $dateQuery);
+
+        $row = $this->db->fetchAssoc($sql);
+        return $row['count'];
+    }
+
+
+
     /**
      * Find drinks order by day with participants
      *
@@ -40,6 +57,92 @@ class Drink extends Repository
         ', self::getCountParticipantsQuery(), $limit);
 
         return $this->db->fetchAll($sql);
+    }
+
+    public function averageParticipantsByCity($dateFrom = null)
+    {
+      $dateQuery = '';
+      if (null !== $dateFrom) {
+        $dateQuery = ' AND day > "' . $dateFrom . '"';
+      }
+      $sql = sprintf(
+        'SELECT CEILING(AVG((%s))) as participants_avg, c.name as name
+           FROM Drink d, City c
+          WHERE d.city_id = c.id %s
+       GROUP BY c.id
+       ORDER BY participants_avg DESC, name
+      ', self::getCountParticipantsQuery(), $dateQuery);
+      return $this->db->fetchAll($sql);
+    }
+
+    public function countAllParticipants($dateFrom = null)
+    {
+      $dateQuery = '';
+      if (null !== $dateFrom) {
+        $dateQuery = ' AND day > "' . $dateFrom . '"';
+      }
+      $sql = sprintf("SELECT COUNT(*) as count
+                      FROM Drink_Participation, Drink
+                      WHERE Drink_Participation.drink_id = Drink.id
+                        AND percentage > 0 %s", $dateQuery);
+      $row = $this->db->fetchAssoc($sql);
+      return $row['count'];
+    }
+
+    public function countParticipantsByDate($dateFrom = null)
+    {
+      $dateQuery = '';
+      if (null !== $dateFrom) {
+        $dateQuery = ' AND day > "' . $dateFrom . '"';
+      }
+      $sql = sprintf("SELECT COUNT(*) as count, day
+                      FROM Drink_Participation, Drink
+                      WHERE Drink_Participation.drink_id = Drink.id
+                        AND percentage > 0 %s
+                      GROUP BY day
+      ", $dateQuery);
+
+      $dates = array();
+      foreach ($this->db->fetchAll($sql) as $row) {
+        $dates[$row['day']] = $row['count'];
+      }
+
+      $dates = array();
+      $dt = new \DateTime('2010-01-01');
+      for ($i=0;$i<800;$i = $i + 20) {
+        $dates[$dt->format('Y-m-d')] = rand(1,30);
+        $dt->modify('+20 day');
+      }
+
+      return $dates;
+    }
+
+
+    public function getGeoInformations($dateFrom = null)
+    {
+      $dateQuery = '';
+      if (null !== $dateFrom) {
+        $dateQuery = ' WHERE day > "' . $dateFrom . '"';
+      }
+       $sql = sprintf('SELECT latitude, longitude, description
+          FROM Drink d %s
+          GROUP BY d.id
+          ORDER BY created_at DESC
+      ', $dateQuery);
+
+      return $this->db->fetchAll($sql);
+    }
+
+
+    public function findFirst($dateFrom = null)
+    {
+      $dateQuery = '';
+      if (null !== $dateFrom) {
+        $dateQuery = ' WHERE day > "' . $dateFrom . '"';
+      }
+
+      $sql = sprintf("SELECT *  FROM Drink %s ORDER BY day, hour, created_at LIMIT 1", $dateQuery);
+      return $this->db->fetchAssoc($sql);
     }
 
     /**
