@@ -22,6 +22,20 @@
                 </ul>
               </div>
 
+              <div class="btn-group pull-right" style="float:right;margin:4px">
+
+                <button class="btn">Ville : {{ types[type] }}</button>
+                <button class="btn dropdown-toggle" data-toggle="dropdown">
+                  <span class="caret"></span>
+                </button>
+
+                <ul class="dropdown-menu" style="overflow:visible">
+                  {% for code, libelle in types %}
+                  <li><a href="{{ url('_stats', {'type': code }) }}">{{ libelle }}{% if type == code %}<i class="icon-ok"></i>{% endif %}</a></li>
+                  {% endfor %}
+                </ul>
+              </div>
+
          </div>
          <div class="widget-content">
          Depuis le {{ date_from|date("d") }} {{ date_from|date("F")|trans|lower }} {{ date_from|date("Y") }} , <span class="highlighted-number">{{ total }}</span> apéros ont été organisés et ont réunis <span class="highlighted-number">{{ total_participants }}</span> participants. Comment ceux-ci sont-ils répartis ?
@@ -82,7 +96,60 @@
     </div>
 </div>
 
+<div class="span8">
+    <div class="widget">
+        <div class="widget-header">
+            <i class="icon-calendar"></i>
+            <h3>Nombre d'inscrits à travers le temps</h3>
+        </div>
+         <div class="widget-content">
+           <table class="highchart"  
+                  data-graph-container-before="1" 
+                  data-graph-type="spline" 
+                  data-graph-legend-disabled="1"
+                  style="display:none"
+                  data-graph-yaxis-1-title-text="Nombre d'inscrits"
+                  data-graph-color-1="#6F8CCD"
+                  data-graph-xaxis-type="datetime"
+           >
+             <thead>
+               <tr>
+                 <th>Date</th>
+                 <th>Nombre d'inscrits</th>
+               </tr>
+             </thead>
+           
+             <tbody>
+           
+             {% for date, count in date_participants %}
+               <tr>
+                 <td>{{ date }}</td>
+                 <td>{{ count }}</td>
+               </tr>
+             {% endfor %}
+           
+           </tbody>
+           
+           </table>
 
+        </div>
+    </div>
+</div>
+
+<div class="span4">
+    <div class="widget widget-nopad participation">
+        <div class="widget-header">
+            <i class="icon-book"></i>
+            <h3>Statistiques diverses</h3>
+        </div>
+         <div class="widget-content">
+          Minimum</br>
+          Maximum
+          Moyenne:
+          
+        </div>
+    </div>
+</div>
 
   <script>
     var addressPoints = {{ geo |json_encode()|raw }};
@@ -113,8 +180,34 @@
 
 
   <script>
-
-        $('table.highchart').highchartTable();
+    Highcharts.setOptions({
+        lang: {
+            months: ['janvier', 'février', 'mars', 'avril', 'mai', 'juin',
+                          'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'],
+            weekdays: ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 
+                             'Jeudi', 'Vendredi', 'Samedi'],
+            shortMonths: ['Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil',
+                                'Aout', 'Sept', 'Oct', 'Nov', 'Déc'],
+            decimalPoint: ',',
+            downloadPNG: 'Télécharger en image PNG',
+            downloadJPEG: 'Télécharger en image JPEG',
+            downloadPDF: 'Télécharger en document PDF',
+            downloadSVG: 'Télécharger en document Vectoriel',
+            exportButtonTitle: 'Export du graphique',
+            loading: 'Chargement en cours...',
+            printButtonTitle: 'Imprimer le graphique',
+            resetZoom: 'Réinitialiser le zoom',
+            resetZoomTitle: 'Réinitialiser le zoom au niveau 1:1',
+            thousandsSep: ' ',
+            decimalPoint: ','
+        }
+    });
+        $('table.highchart')
+  .bind('highchartTable.beforeRender', function(event, highChartConfig) {
+highChartConfig.chart.zoomType = "x";
+//"zoomType": "x"
+  })
+        .highchartTable();
   </script>
 
 

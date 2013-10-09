@@ -89,6 +89,35 @@ class Drink extends Repository
       return $row['count'];
     }
 
+    public function countParticipantsByDate($dateFrom = null)
+    {
+      $dateQuery = '';
+      if (null !== $dateFrom) {
+        $dateQuery = ' AND day > "' . $dateFrom . '"';
+      }
+      $sql = sprintf("SELECT COUNT(*) as count, day
+                      FROM Drink_Participation, Drink
+                      WHERE Drink_Participation.drink_id = Drink.id
+                        AND percentage > 0 %s
+                      GROUP BY day
+      ", $dateQuery);
+
+      $dates = array();
+      foreach ($this->db->fetchAll($sql) as $row) {
+        $dates[$row['day']] = $row['count'];
+      }
+
+      $dates = array();
+      $dt = new \DateTime('2010-01-01');
+      for ($i=0;$i<800;$i = $i + 20) {
+        $dates[$dt->format('Y-m-d')] = rand(1,30);
+        $dt->modify('+20 day');
+      }
+
+      return $dates;
+    }
+
+
     public function getGeoInformations($dateFrom = null)
     {
       $dateQuery = '';

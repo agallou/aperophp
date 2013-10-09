@@ -14,7 +14,7 @@ span.highlighted-number {
 }
 
 #map { 
-  height: 280px; 
+  height: 350px; 
 }
 
 .leaflet-cluster-anim .leaflet-marker-icon, .leaflet-cluster-anim .leaflet-marker-shadow {

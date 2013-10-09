@@ -50,6 +50,7 @@ class Stats implements ControllerProviderInterface
             'total' => $totalCount,
             'total_participants' => $app['drinks']->countAllParticipants($dateFrom),
             'avg_participants' => $app['drinks']->averageParticipantsByCity($dateFrom),
+            'date_participants' => $app['drinks']->countParticipantsByDate($dateFrom),
             'date_from' => $displayedDate,
             'geo' => $geo,
             'type' => $type,
