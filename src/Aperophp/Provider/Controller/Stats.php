@@ -19,11 +19,13 @@ class Stats implements ControllerProviderInterface
           $app['session']->set('menu', 'stats');
 
           $types = StatsLib::getTypes();
-          $dateFrom = StatsLib::getDateFrom($type);
 
           if (!isset($types[$type])) {
             $type = 'all';
           }
+
+          $dateFrom = StatsLib::getDateFrom($type);
+
 
           $stats = new StatsLib($app['db'], $dateFrom, $city);
           $totalCount = $stats->getCount();
@@ -34,9 +36,9 @@ class Stats implements ControllerProviderInterface
             $geo[] = array($info['latitude'], $info['longitude'], $info['description']);
           }
 
-          $displayedDate = $stats->findFirst();
-          if (count($displayedDate)) {
-            $displayedDate = $dateFrom;
+          $displayedDate = $dateFrom;
+          if (count($first = $stats->findFirst())) {
+            $displayedDate = $first['day'];
           }
 
           $cities = array(City::ALL => 'Toutes') + $app['cities']->findRecurrentInAssociativeArray();
