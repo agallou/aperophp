@@ -41,6 +41,12 @@ class Stats implements ControllerProviderInterface
 
           $cities = array(City::ALL => 'Toutes') + $app['cities']->findRecurrentInAssociativeArray();
 
+          $various = array(
+            'month' => $stats->getMostUsedMonth(),
+            'average' => $stats->getAverageParticipants(),
+            'max' => $stats->getMaxParticipants(),
+          );
+
           return $app['twig']->render('stats/stats.html.twig', array(
             'total' => $totalCount,
             'total_participants' => $stats->countAllParticipants(),
@@ -53,6 +59,7 @@ class Stats implements ControllerProviderInterface
             'city' => $city,
             'cities' => $cities,
             'display_all_cities' => $city == City::ALL,
+            'various' => $various
             ));
         })
         ->bind('_stats')

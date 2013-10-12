@@ -154,11 +154,9 @@
         </div>
          <div class="widget-content">
           <ul>
-            <li>Minimum</li>
-            <li>Maximum</li>
-            <li>Moyenne:</li>
-            <li>Les développeurs PHP préfèrent boire au mois de Janvier</li>
-            <li>Mois le moins utilisé</li>
+            <li>Moyenne de participants : {{ various.average }}</li>
+            <li>Nombre maximum de participants : {{ various.max }}</li>
+            <li>Les développeurs PHP préfèrent boire au mois de {{ various.month|date('F')|trans }}</li>
           </ul>        
         </div>
     </div>

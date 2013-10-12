@@ -143,6 +143,41 @@ class Stats
       return $queryBuilder->execute()->fetch();
     }
 
+    public function getMostUSedMonth()
+    {
+      return $this->getBaseDrinkQuery()
+        ->addSelect('day')
+        ->addOrderBy('COUNT(*)')
+        ->innerJoin('d', 'Drink_Participation', 'dp', 'dp.drink_id = d.id')
+        ->andWhere('dp.percentage > 0')
+        ->addGroupBy('MONTH(day)')
+        ->setMaxResults(1)
+        ->execute()
+        ->fetchColumn()
+      ;
+    }
+
+    public function getAverageParticipants()
+    {
+      return $this->getBaseDrinkQuery()
+        ->select(sprintf("CEILING(AVG((%s))) as participants_avg", Drink::getCountParticipantsQuery()))
+        ->innerJoin('d', 'Drink_Participation', 'dp', 'dp.drink_id = d.id')
+        ->execute()
+        ->fetchColumn()
+      ;
+    }
+
+    public function getMaxParticipants()
+    {
+      return $this->getBaseDrinkQuery()
+        ->select(sprintf("MAX((%s)) as participants_avg", Drink::getCountParticipantsQuery()))
+        ->innerJoin('d', 'Drink_Participation', 'dp', 'dp.drink_id = d.id')
+        ->execute()
+        ->fetchColumn()
+      ;
+    }
+
+
 
 }
 
