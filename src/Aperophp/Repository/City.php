@@ -2,6 +2,8 @@
 
 namespace Aperophp\Repository;
 
+use Aperophp\Lib\Stats;
+
 class City extends Repository
 {
 
@@ -39,9 +41,9 @@ class City extends Repository
            FROM Drink d, City c
           WHERE d.city_id = c.id
           GROUP BY c.id
-          HAVING COUNT(d.id) > 4
+          HAVING COUNT(d.id) > %s
           ORDER BY name
-        ');
+        ', Stats::RECURRENT_MINIMUM);
 
         foreach ($this->db->fetchAll($sql) as $city) {
             $cities[$city['id']] = $city['name'];

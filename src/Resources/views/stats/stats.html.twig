@@ -98,7 +98,7 @@
            
            </table>
           {% if type == 'all' %}
-          Seulement les villes ayant organisées plus de 4 apéros sont affichées.
+          Seulement les villes ayant organisées plus de {{ constant('\\Aperophp\\Lib\\Stats::RECURRENT_MINIMUM') }} apéros sont affichées.
           {% endif %}
         </div>
     </div>
