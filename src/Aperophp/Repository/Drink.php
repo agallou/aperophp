@@ -18,23 +18,30 @@ class Drink extends Repository
         return 'Drink';
     }
 
-    public function getCount($dateFrom, $city = City::ALL)
+    protected function getBaseDrinkQuery($dateFrom = null, $city = City::ALL)
     {
-        $dateQuery = '';
-        if (null !== $dateFrom) {
-          $dateQuery = ' AND day > "' . $dateFrom . '"';
-        }
-        if ($city != City::ALL) {
-          $dateQuery .= sprintf(' AND city_id = %s', $city);
-        }
-        $sql = sprintf('SELECT COUNT(d.id) as count
-            FROM Drink d WHERE 1 = 1 %s
-        ', $dateQuery);
+      $queryBuilder = $this->db->createQueryBuilder()
+        ->from('Drink', 'd')
+      ;
+      if (null !== $dateFrom) {
+        $queryBuilder->andWhere('day > :datefrom');
+        $queryBuilder->setParameter('datefrom', $dateFrom);
+      }
+      if ($city != City::ALL) {
+       $queryBuilder->andWhere(sprintf('city_id = %s', $city));
+      }
 
-        $row = $this->db->fetchAssoc($sql);
-        return $row['count'];
+      return $queryBuilder;
     }
 
+    public function getCount($dateFrom, $city = City::ALL)
+    {
+        $queryBuilder = $this->getBaseDrinkQuery($dateFrom, $city)
+          ->select('count(d.id) as count')
+        ;
+
+        return $queryBuilder->execute()->fetchColumn();
+    }
 
 
     /**
@@ -66,97 +73,72 @@ class Drink extends Repository
 
     public function averageParticipantsByCity($dateFrom = null, $onlyRecurrentCities = false)
     {
-      //TODO ajouter having seulement si on est sur la vue tous.
-      $dateQuery = '';
-      if (null !== $dateFrom) {
-        $dateQuery = ' AND day > "' . $dateFrom . '"';
-      }
-      $having = '';
-      if ($onlyRecurrentCities) {
-          $having = "HAVING total_drinks > 4";
-      }
-      $sql = sprintf(
-        'SELECT CEILING(AVG((%s))) as participants_avg, COUNT(d.id) as total_drinks, c.name as name
-           FROM Drink d, City c
-          WHERE d.city_id = c.id %s
-          GROUP BY c.id
-          %s
-          ORDER BY participants_avg DESC, name
+      $queryBuilder = $this->getBaseDrinkQuery($dateFrom)
+        ->addSelect(sprintf("CEILING(AVG((%s))) as participants_avg", self::getCountParticipantsQuery()))
+        ->addSelect('COUNT(d.id) as total_drinks')
+        ->addSelect('c.name as name')
+        ->innerJoin('d', 'City', 'c', 'd.city_id = c.id')
+        ->addGroupBy('c.id')
+        ->addOrderBy('participants_avg', 'DESC')
+        ->addOrderBy('name')
+      ;
 
-      ', self::getCountParticipantsQuery(), $dateQuery, $having);
-      return $this->db->fetchAll($sql);
+      if ($onlyRecurrentCities) {
+        $queryBuilder->andHaving('total_drinks > 4');
+      }
+
+      return $queryBuilder->execute()->fetchAll();
     }
 
     public function countAllParticipants($dateFrom = null, $city = City::ALL)
     {
-      $dateQuery = '';
-      if (null !== $dateFrom) {
-        $dateQuery = ' AND day > "' . $dateFrom . '"';
-      }
-      if ($city != City::ALL) {
-        $dateQuery .= sprintf(' AND Drink.city_id = %s', $city);
-      }
-      $sql = sprintf("SELECT COUNT(*) as count
-                      FROM Drink_Participation, Drink
-                      WHERE Drink_Participation.drink_id = Drink.id
-                        AND percentage > 0 %s", $dateQuery);
-      $row = $this->db->fetchAssoc($sql);
-      return $row['count'];
+      $queryBuilder = $this->getBaseDrinkQuery($dateFrom, $city)
+        ->addSelect('count(*) as count')
+        ->innerJoin('d', 'Drink_Participation', 'dp', 'dp.drink_id = d.id')
+        ->andWhere('dp.percentage > 0')
+      ;
+
+      return $queryBuilder->execute()->fetchColumn();
     }
 
     public function countParticipantsByDate($dateFrom = null, $city = City::ALL)
     {
-      $dateQuery = '';
-      if (null !== $dateFrom) {
-        $dateQuery = ' AND day > "' . $dateFrom . '"';
-      }
-      if ($city != City::ALL) {
-        $dateQuery .= sprintf(' AND Drink.city_id = %s', $city);
-      }
-      $sql = sprintf("SELECT COUNT(*) as count, day
-                      FROM Drink_Participation, Drink
-                      WHERE Drink_Participation.drink_id = Drink.id
-                        AND percentage > 0 %s
-                      GROUP BY day
-      ", $dateQuery);
-
-      $dates = array();
-      foreach ($this->db->fetchAll($sql) as $row) {
+      $queryBuilder = $this->getBaseDrinkQuery($dateFrom, $city)
+        ->addSelect('count(*) as count')
+        ->addSelect('d.day as day')
+        ->innerJoin('d', 'Drink_Participation', 'dp', 'dp.drink_id = d.id')
+        ->andWhere('dp.percentage > 0')
+        ->addGroupBy('day')
+      ;
+      foreach ($queryBuilder->execute() as $row) {
         $dates[$row['day']] = $row['count'];
       }
 
       return $dates;
     }
 
-
     public function getGeoInformations($dateFrom = null)
     {
-      $dateQuery = '';
-      if (null !== $dateFrom) {
-        $dateQuery = ' AND day > "' . $dateFrom . '"';
-      }
-       $sql = sprintf('SELECT latitude, longitude, description
-          FROM Drink d
-          WHERE (latitude < 48.8 OR latitude > 49.9)
-           AND (longitude < 2.29 OR longitude > 2.30)
-           %s
-          GROUP BY d.id
-          ORDER BY created_at DESC
-      ', $dateQuery);
-
-      return $this->db->fetchAll($sql);
+      $queryBuilder = $this->getBaseDrinkQuery($dateFrom)
+        ->addSelect('latitude', 'longitude', 'description')
+        ->addGroupBy('d.id')
+        ->addOrderBy('created_at', 'DESC')
+      ;
+      return $queryBuilder->execute()->fetchAll();
     }
 
 
     public function findFirst($dateFrom = null)
     {
-      $dateQuery = '';
-      if (null !== $dateFrom) {
-        $dateQuery = ' WHERE day > "' . $dateFrom . '"';
-      }
+      $queryBuilder = $this->getBaseDrinkQuery($dateFrom)
+        ->select('*')
+        ->addOrderBy('day')
+        ->addOrderBy('hour')
+        ->addOrderBy('created_at')
+        ->setMaxResults(1)
+      ;
 
-      $sql = sprintf("SELECT *  FROM Drink %s ORDER BY day, hour, created_at LIMIT 1", $dateQuery);
-      return $this->db->fetchAssoc($sql);
+      return $queryBuilder->execute()->fetch();
     }
 
     /**
