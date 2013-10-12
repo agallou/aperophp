@@ -5,6 +5,7 @@ namespace Aperophp\Provider\Controller;
 use Silex\Application;
 use Silex\ControllerProviderInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Aperophp\Repository\City;
 
 class Stats implements ControllerProviderInterface
 {
@@ -12,7 +13,7 @@ class Stats implements ControllerProviderInterface
     {
         $controllers = $app['controllers_factory'];
 
-        $controllers->match('stats_{type}.html', function(Request $request, $type) use ($app)
+        $controllers->match('stats_{type}-{city}.html', function(Request $request, $type, $city) use ($app)
         {
           $app['session']->set('menu', 'stats');
           $types = array(
@@ -34,7 +35,7 @@ class Stats implements ControllerProviderInterface
             $dateFrom = $date->format('Y-m-d');
           }
 
-          $totalCount = $app['drinks']->getCount($dateFrom);
+          $totalCount = $app['drinks']->getCount($dateFrom, $city);
 
           $geo = array();
           foreach ($app['drinks']->getGeoInformations($dateFrom) as $info) {
@@ -46,15 +47,20 @@ class Stats implements ControllerProviderInterface
             $displayedDate = $dateFrom;
           }
 
+          $cities = array(City::ALL => 'Toutes') + $app['cities']->findRecurrentInAssociativeArray();
+
           return $app['twig']->render('stats/stats.html.twig', array(
             'total' => $totalCount,
-            'total_participants' => $app['drinks']->countAllParticipants($dateFrom),
-            'avg_participants' => $app['drinks']->averageParticipantsByCity($dateFrom),
-            'date_participants' => $app['drinks']->countParticipantsByDate($dateFrom),
+            'total_participants' => $app['drinks']->countAllParticipants($dateFrom, $city),
+            'avg_participants' => $app['drinks']->averageParticipantsByCity($dateFrom, 'all' == $type),
+            'date_participants' => $app['drinks']->countParticipantsByDate($dateFrom, $city),
             'date_from' => $displayedDate,
             'geo' => $geo,
             'type' => $type,
             'types' => $types,
+            'city' => $city,
+            'cities' => $cities,
+            'display_all_cities' => $city == City::ALL,
             ));
         })
         ->bind('_stats')

@@ -29,7 +29,7 @@
                     </a>
                 </li>
                 <li{% if app.session.get('menu') == 'stats' %} class="active"{% endif %}>
-                    <a href="{{ url('_stats', {'type': 'all'}) }}">
+                    <a href="{{ url('_stats', {'type': 'all', 'city': 0}) }}">
                         <i class="icon-signal"></i> <span>Statistiques</span>
                     </a>
                 </li>

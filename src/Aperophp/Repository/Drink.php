@@ -2,6 +2,9 @@
 
 namespace Aperophp\Repository;
 
+use Aperophp\Repository\City;
+
+
 /**
  * Drink repository
  */
@@ -15,15 +18,17 @@ class Drink extends Repository
         return 'Drink';
     }
 
-    public function getCount($dateFrom)
+    public function getCount($dateFrom, $city = City::ALL)
     {
         $dateQuery = '';
         if (null !== $dateFrom) {
-          $dateQuery = ' WHERE day > "' . $dateFrom . '"';
+          $dateQuery = ' AND day > "' . $dateFrom . '"';
         }
-
+        if ($city != City::ALL) {
+          $dateQuery .= sprintf(' AND city_id = %s', $city);
+        }
         $sql = sprintf('SELECT COUNT(d.id) as count
-            FROM Drink d %s
+            FROM Drink d WHERE 1 = 1 %s
         ', $dateQuery);
 
         $row = $this->db->fetchAssoc($sql);
@@ -59,27 +64,37 @@ class Drink extends Repository
         return $this->db->fetchAll($sql);
     }
 
-    public function averageParticipantsByCity($dateFrom = null)
+    public function averageParticipantsByCity($dateFrom = null, $onlyRecurrentCities = false)
+    {
+      //TODO ajouter having seulement si on est sur la vue tous.
+      $dateQuery = '';
+      if (null !== $dateFrom) {
+        $dateQuery = ' AND day > "' . $dateFrom . '"';
+      }
+      $having = '';
+      if ($onlyRecurrentCities) {
+          $having = "HAVING total_drinks > 4";
+      }
+      $sql = sprintf(
+        'SELECT CEILING(AVG((%s))) as participants_avg, COUNT(d.id) as total_drinks, c.name as name
+           FROM Drink d, City c
+          WHERE d.city_id = c.id %s
+          GROUP BY c.id
+          %s
+          ORDER BY participants_avg DESC, name
+
+      ', self::getCountParticipantsQuery(), $dateQuery, $having);
+      return $this->db->fetchAll($sql);
+    }
+
+    public function countAllParticipants($dateFrom = null, $city = City::ALL)
     {
       $dateQuery = '';
       if (null !== $dateFrom) {
         $dateQuery = ' AND day > "' . $dateFrom . '"';
       }
-      $sql = sprintf(
-        'SELECT CEILING(AVG((%s))) as participants_avg, c.name as name
-           FROM Drink d, City c
-          WHERE d.city_id = c.id %s
-       GROUP BY c.id
-       ORDER BY participants_avg DESC, name
-      ', self::getCountParticipantsQuery(), $dateQuery);
-      return $this->db->fetchAll($sql);
-    }
-
-    public function countAllParticipants($dateFrom = null)
-    {
-      $dateQuery = '';
-      if (null !== $dateFrom) {
-        $dateQuery = ' AND day > "' . $dateFrom . '"';
+      if ($city != City::ALL) {
+        $dateQuery .= sprintf(' AND Drink.city_id = %s', $city);
       }
       $sql = sprintf("SELECT COUNT(*) as count
                       FROM Drink_Participation, Drink
@@ -89,11 +104,14 @@ class Drink extends Repository
       return $row['count'];
     }
 
-    public function countParticipantsByDate($dateFrom = null)
+    public function countParticipantsByDate($dateFrom = null, $city = City::ALL)
     {
       $dateQuery = '';
       if (null !== $dateFrom) {
         $dateQuery = ' AND day > "' . $dateFrom . '"';
+      }
+      if ($city != City::ALL) {
+        $dateQuery .= sprintf(' AND Drink.city_id = %s', $city);
       }
       $sql = sprintf("SELECT COUNT(*) as count, day
                       FROM Drink_Participation, Drink
@@ -107,13 +125,6 @@ class Drink extends Repository
         $dates[$row['day']] = $row['count'];
       }
 
-      $dates = array();
-      $dt = new \DateTime('2010-01-01');
-      for ($i=0;$i<800;$i = $i + 20) {
-        $dates[$dt->format('Y-m-d')] = rand(1,30);
-        $dt->modify('+20 day');
-      }
-
       return $dates;
     }
 
@@ -122,10 +133,13 @@ class Drink extends Repository
     {
       $dateQuery = '';
       if (null !== $dateFrom) {
-        $dateQuery = ' WHERE day > "' . $dateFrom . '"';
+        $dateQuery = ' AND day > "' . $dateFrom . '"';
       }
        $sql = sprintf('SELECT latitude, longitude, description
-          FROM Drink d %s
+          FROM Drink d
+          WHERE (latitude < 48.8 OR latitude > 49.9)
+           AND (longitude < 2.29 OR longitude > 2.30)
+           %s
           GROUP BY d.id
           ORDER BY created_at DESC
       ', $dateQuery);

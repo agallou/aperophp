@@ -17,32 +17,33 @@
 
                 <ul class="dropdown-menu" style="overflow:visible">
                   {% for code, libelle in types %}
-                  <li><a href="{{ url('_stats', {'type': code }) }}">{{ libelle }}{% if type == code %}<i class="icon-ok"></i>{% endif %}</a></li>
+                  <li><a href="{{ url('_stats', {'type': code, 'city': city }) }}">{{ libelle }}{% if type == code %}<i class="icon-ok"></i>{% endif %}</a></li>
                   {% endfor %}
                 </ul>
               </div>
 
               <div class="btn-group pull-right" style="float:right;margin:4px">
 
-                <button class="btn">Ville : {{ types[type] }}</button>
+                <button class="btn">Ville : {{ cities[city] }}</button>
                 <button class="btn dropdown-toggle" data-toggle="dropdown">
                   <span class="caret"></span>
                 </button>
 
                 <ul class="dropdown-menu" style="overflow:visible">
-                  {% for code, libelle in types %}
-                  <li><a href="{{ url('_stats', {'type': code }) }}">{{ libelle }}{% if type == code %}<i class="icon-ok"></i>{% endif %}</a></li>
+                  {% for id, libelle in cities %}
+                  <li><a href="{{ url('_stats', {'type': type, 'city' : id }) }}">{{ libelle }}{% if city == id %}<i class="icon-ok"></i>{% endif %}</a></li>
                   {% endfor %}
                 </ul>
               </div>
 
          </div>
          <div class="widget-content">
-         Depuis le {{ date_from|date("d") }} {{ date_from|date("F")|trans|lower }} {{ date_from|date("Y") }} , <span class="highlighted-number">{{ total }}</span> apéros ont été organisés et ont réunis <span class="highlighted-number">{{ total_participants }}</span> participants. Comment ceux-ci sont-ils répartis ?
+         Depuis le {{ date_from|date("d") }} {{ date_from|date("F")|trans|lower }} {{ date_from|date("Y") }} , <span class="highlighted-number">{{ total }}</span> apéros ont été organisés et ont réunis <span class="highlighted-number">{{ total_participants|number_format(0, '', ' ') }}</span> participants. Comment ceux-ci sont-ils répartis ?
         </div>
     </div>
 </div>
 
+{% if display_all_cities %}
 <div class="span4">
     <div class="widget widget-nopad participation">
         <div class="widget-header">
@@ -66,16 +67,19 @@
            <table class="highchart"  
                   data-graph-container-before="1" 
                   data-graph-type="column" 
-                  data-graph-legend-disabled="1"
+                  data-graph-legend-disabled="0"
                   style="display:none"
-                  data-graph-yaxis-1-title-text="Moyenne d'inscrits"
+                  data-graph-yaxis-2-title-text="Moyenne d'inscrits"
+                  data-graph-yaxis-1-title-text="Nombre d'apéros"
                   data-graph-xaxis-title-text="Ville"
                   data-graph-color-1="#6F8CCD"
+                  data-graph-yaxis-1-opposite="1"
            >
              <thead>
                <tr>
                  <th>Ville</th>
-                 <th>Moyenne du nombre inscrits</th>
+                 <th data-graph-yaxis="1">Moyenne du nombre inscrits</th>
+                 <th data-graph-hidden="1">Mombre d'apéros</th>
                </tr>
              </thead>
            
@@ -84,17 +88,23 @@
              {% for city in avg_participants %}
                <tr>
                  <td>{{ city.name }}</td>
-                 <td>{{ city.participants_avg }}</td>
+                 <td >{{ city.participants_avg }}</td>
+                 <td>{{ city.total_drinks }}</td>
+
                </tr>
              {% endfor %}
            
            </tbody>
            
            </table>
-
+          {% if type == 'all' %}
+          Seulement les villes ayant organisées plus de 4 apéros sont affichées.
+          {% endif %}
         </div>
     </div>
 </div>
+
+{% endif %}
 
 <div class="span8">
     <div class="widget">
@@ -105,7 +115,7 @@
          <div class="widget-content">
            <table class="highchart"  
                   data-graph-container-before="1" 
-                  data-graph-type="spline" 
+                  data-graph-type="column" 
                   data-graph-legend-disabled="1"
                   style="display:none"
                   data-graph-yaxis-1-title-text="Nombre d'inscrits"
@@ -143,10 +153,13 @@
             <h3>Statistiques diverses</h3>
         </div>
          <div class="widget-content">
-          Minimum</br>
-          Maximum
-          Moyenne:
-          
+          <ul>
+            <li>Minimum</li>
+            <li>Maximum</li>
+            <li>Moyenne:</li>
+            <li>Les développeurs PHP préfèrent boire au mois de Janvier</li>
+            <li>Mois le moins utilisé</li>
+          </ul>        
         </div>
     </div>
 </div>
@@ -164,7 +177,7 @@
 
     var map = L.map('map', {center: latlng, zoom: 5, layers: [cloudmade]});
 
-    var markers = L.markerClusterGroup();
+    var markers = L.markerClusterGroup({maxClusterRadius:50, singleMarkerMode:true});
     
     for (var i = 0; i < addressPoints.length; i++) {
       var a = addressPoints[i];
@@ -204,7 +217,17 @@
     });
         $('table.highchart')
   .bind('highchartTable.beforeRender', function(event, highChartConfig) {
-highChartConfig.chart.zoomType = "x";
+    highChartConfig.chart.zoomType = "x";
+    highChartConfig.xAxis.dateTimeLabelFormats = {
+  millisecond: '%H:%M:%S.%L',
+  second: '%H:%M:%S',
+  minute: '%H:%M',
+  hour: '%H:%M',
+  day: '%e. %b',
+  week: '%e. %b',
+  month: '%b \'%y',
+  year: '%Y'
+};
 //"zoomType": "x"
   })
         .highchartTable();
