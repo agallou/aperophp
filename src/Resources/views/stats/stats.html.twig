@@ -167,13 +167,9 @@
 </script>
 
   <script type="text/javascript">
-
-  var cloudmadeUrl = 'http://{s}.tile.cloudmade.com/BC9A493B41014CAABB98F0471D759707/997/256/{z}/{x}/{y}.png',
-      cloudmadeAttribution = 'Map data &copy; 2011 OpenStreetMap contributors, Imagery &copy; 2011 CloudMade, Points &copy 2012 LINZ',
-      cloudmade = L.tileLayer(cloudmadeUrl, {maxZoom: 17, attribution: cloudmadeAttribution}),
-      latlng = L.latLng(46.70, 2.51);
-
-    var map = L.map('map', {center: latlng, zoom: 5, layers: [cloudmade]});
+    var latlng = L.latLng(46.70, 2.51);
+    var map = L.map('map', {center: latlng, zoom: 5, maxZoom: 7, minZoom: 4});
+    L.tileLayer.provider('OpenStreetMap').addTo(map);
 
     var markers = L.markerClusterGroup({maxClusterRadius:50, singleMarkerMode:true});
     
