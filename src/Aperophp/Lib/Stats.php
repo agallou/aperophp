@@ -1,4 +1,5 @@
 <?php
+
 namespace Aperophp\Lib;
 
 use Doctrine\DBAL\Connection;
@@ -7,12 +8,26 @@ use Aperophp\Repository\Drink;
 
 class Stats
 {
-
+    /**
+     *
+     */
     const RECURRENT_MINIMUM = 5;
 
+    /**
+     * @var string|null
+     */
     protected $dateFrom;
+
+    /**
+     * @var int
+     */
     protected $city;
 
+    /**
+     * @param Connection $db
+     * @param string|null $dateFrom
+     * @param int $city
+     */
     public function __construct(Connection $db, $dateFrom = null, $city = City::ALL)
     {
       $this->db = $db;
@@ -20,6 +35,11 @@ class Stats
       $this->city = $city;
     }
 
+    /**
+     * @param string $type
+     *
+     * @return null|string
+     */
     public static function getDateFrom($type)
     {
       $dateFrom = null;
@@ -35,6 +55,9 @@ class Stats
       return $dateFrom;
     }
 
+    /**
+     * @return array
+     */
     public static function getTypes()
     {
       return array(
@@ -44,6 +67,9 @@ class Stats
       );
     }
 
+    /**
+     * @return \Doctrine\DBAL\Query\QueryBuilder
+     */
     protected function getBaseDrinkQuery()
     {
       $dateFrom = $this->dateFrom;
@@ -62,6 +88,9 @@ class Stats
       return $queryBuilder;
     }
 
+    /**
+     * @return int
+     */
     public function getCount()
     {
         $queryBuilder = $this->getBaseDrinkQuery()
@@ -71,7 +100,11 @@ class Stats
         return $queryBuilder->execute()->fetchColumn();
     }
 
-
+    /**
+     * @param bool $onlyRecurrentCities
+     *
+     * @return array
+     */
     public function averageParticipantsByCity($onlyRecurrentCities = false)
     {
       $queryBuilder = $this->getBaseDrinkQuery()
@@ -92,6 +125,9 @@ class Stats
       return $queryBuilder->execute()->fetchAll();
     }
 
+    /**
+     * @return int
+     */
     public function countAllParticipants()
     {
       $queryBuilder = $this->getBaseDrinkQuery()
@@ -103,6 +139,9 @@ class Stats
       return $queryBuilder->execute()->fetchColumn();
     }
 
+    /**
+     * @return array
+     */
     public function countParticipantsByDate()
     {
       $queryBuilder = $this->getBaseDrinkQuery()
@@ -112,6 +151,9 @@ class Stats
         ->andWhere('dp.percentage > 0')
         ->addGroupBy('day')
       ;
+
+      $dates = array();
+
       foreach ($queryBuilder->execute() as $row) {
         $dates[$row['day']] = $row['count'];
       }
@@ -119,6 +161,9 @@ class Stats
       return $dates;
     }
 
+    /**
+     * @return array
+     */
     public function getGeoInformations()
     {
       $queryBuilder = $this->getBaseDrinkQuery()
@@ -129,7 +174,9 @@ class Stats
       return $queryBuilder->execute()->fetchAll();
     }
 
-
+    /**
+     * @return array
+     */
     public function findFirst()
     {
       $queryBuilder = $this->getBaseDrinkQuery()
@@ -143,6 +190,9 @@ class Stats
       return $queryBuilder->execute()->fetch();
     }
 
+    /**
+     * @return mixed
+     */
     public function getMostUSedMonth()
     {
       return $this->getBaseDrinkQuery()
@@ -157,6 +207,9 @@ class Stats
       ;
     }
 
+    /**
+     * @return int
+     */
     public function getAverageParticipants()
     {
       return $this->getBaseDrinkQuery()
@@ -167,6 +220,9 @@ class Stats
       ;
     }
 
+    /**
+     * @return int
+     */
     public function getMaxParticipants()
     {
       return $this->getBaseDrinkQuery()
@@ -176,8 +232,4 @@ class Stats
         ->fetchColumn()
       ;
     }
-
-
-
 }
-
