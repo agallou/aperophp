@@ -13,8 +13,8 @@ span.highlighted-number {
   font-size:35px;
 }
 
-#map { 
-  height: 350px; 
+#map {
+  height: 350px;
 }
 
 .leaflet-cluster-anim .leaflet-marker-icon, .leaflet-cluster-anim .leaflet-marker-shadow {

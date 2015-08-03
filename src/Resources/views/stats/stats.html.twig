@@ -68,9 +68,9 @@
             <h3>Moyenne du nombre d'inscrits aux apéros, par ville</h3>
         </div>
          <div class="widget-content">
-           <table class="highchart"  
-                  data-graph-container-before="1" 
-                  data-graph-type="column" 
+           <table class="highchart"
+                  data-graph-container-before="1"
+                  data-graph-type="column"
                   data-graph-legend-disabled="0"
                   style="display:none"
                   data-graph-yaxis-2-title-text="Moyenne d'inscrits"
@@ -86,9 +86,9 @@
                  <th data-graph-hidden="1">Mombre d'apéros</th>
                </tr>
              </thead>
-           
+
              <tbody>
-           
+
              {% for city in avg_participants %}
                <tr>
                  <td>{{ city.name }}</td>
@@ -97,9 +97,9 @@
 
                </tr>
              {% endfor %}
-           
+
            </tbody>
-           
+
            </table>
           {% if type == 'all' %}
           Seulement les villes ayant organisées plus de {{ constant('\\Aperophp\\Lib\\Stats::RECURRENT_MINIMUM') }} apéros sont affichées.
@@ -118,9 +118,9 @@
             <h3>Nombre d'inscrits à travers le temps</h3>
         </div>
          <div class="widget-content">
-           <table class="highchart"  
-                  data-graph-container-before="1" 
-                  data-graph-type="column" 
+           <table class="highchart"
+                  data-graph-container-before="1"
+                  data-graph-type="column"
                   data-graph-legend-disabled="1"
                   style="display:none"
                   data-graph-yaxis-1-title-text="Nombre d'inscrits"
@@ -133,18 +133,18 @@
                  <th>Nombre d'inscrits</th>
                </tr>
              </thead>
-           
+
              <tbody>
-           
+
              {% for date, count in date_participants %}
                <tr>
                  <td>{{ date }}</td>
                  <td>{{ count }}</td>
                </tr>
              {% endfor %}
-           
+
            </tbody>
-           
+
            </table>
 
         </div>
@@ -162,7 +162,7 @@
             <li>Moyenne de participants : {{ various.average }}</li>
             <li>Nombre maximum de participants : {{ various.max }}</li>
             <li>Les développeurs PHP préfèrent boire au mois de {{ various.month|date('F')|trans }}</li>
-          </ul>        
+          </ul>
         </div>
     </div>
 </div>
