@@ -38,12 +38,16 @@
 
          </div>
          <div class="widget-content">
+         {% if total %}
          Depuis le {{ date_from|date("d") }} {{ date_from|date("F")|trans|lower }} {{ date_from|date("Y") }} , <span class="highlighted-number">{{ total }}</span> apéros ont été organisés et ont réunis <span class="highlighted-number">{{ total_participants|number_format(0, '', ' ') }}</span> participants. Comment ceux-ci sont-ils répartis ?
+         {% else %}
+         Aucun résultat.
+         {% endif %}
         </div>
     </div>
 </div>
 
-{% if display_all_cities %}
+{% if total and display_all_cities %}
 <div class="span4">
     <div class="widget widget-nopad participation">
         <div class="widget-header">
@@ -106,6 +110,7 @@
 
 {% endif %}
 
+{% if total %}
 <div class="span8">
     <div class="widget">
         <div class="widget-header">
@@ -228,5 +233,6 @@
   </script>
 
 
+{% endif %}
 
 {% endblock %}
