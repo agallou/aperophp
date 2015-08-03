@@ -2,9 +2,6 @@
 
 namespace Aperophp\Repository;
 
-use Aperophp\Repository\City;
-
-
 /**
  * Drink repository
  */
