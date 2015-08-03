@@ -167,72 +167,25 @@
     </div>
 </div>
 
-  <script>
-    var addressPoints = {{ geo |json_encode()|raw }};
-</script>
-
-  <script type="text/javascript">
-    var latlng = L.latLng(46.70, 2.51);
-    var map = L.map('map', {center: latlng, zoom: 5, maxZoom: 7, minZoom: 4});
-    L.tileLayer.provider('OpenStreetMap').addTo(map);
-
-    var markers = L.markerClusterGroup({maxClusterRadius:50, singleMarkerMode:true});
-    
-    for (var i = 0; i < addressPoints.length; i++) {
-      var a = addressPoints[i];
-      var title = a[2];
-      var marker = L.marker(new L.LatLng(a[0], a[1]), { title: title });
-      marker.bindPopup(title);
-      markers.addLayer(marker);
-    }
-
-    map.addLayer(markers);
-
-  </script>
-
-
-  <script>
-    Highcharts.setOptions({
-        lang: {
-            months: ['janvier', 'février', 'mars', 'avril', 'mai', 'juin',
-                          'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'],
-            weekdays: ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 
-                             'Jeudi', 'Vendredi', 'Samedi'],
-            shortMonths: ['Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil',
-                                'Aout', 'Sept', 'Oct', 'Nov', 'Déc'],
-            decimalPoint: ',',
-            downloadPNG: 'Télécharger en image PNG',
-            downloadJPEG: 'Télécharger en image JPEG',
-            downloadPDF: 'Télécharger en document PDF',
-            downloadSVG: 'Télécharger en document Vectoriel',
-            exportButtonTitle: 'Export du graphique',
-            loading: 'Chargement en cours...',
-            printButtonTitle: 'Imprimer le graphique',
-            resetZoom: 'Réinitialiser le zoom',
-            resetZoomTitle: 'Réinitialiser le zoom au niveau 1:1',
-            thousandsSep: ' ',
-            decimalPoint: ','
-        }
-    });
-        $('table.highchart')
-  .bind('highchartTable.beforeRender', function(event, highChartConfig) {
-    highChartConfig.chart.zoomType = "x";
-    highChartConfig.xAxis.dateTimeLabelFormats = {
-  millisecond: '%H:%M:%S.%L',
-  second: '%H:%M:%S',
-  minute: '%H:%M',
-  hour: '%H:%M',
-  day: '%e. %b',
-  week: '%e. %b',
-  month: '%b \'%y',
-  year: '%Y'
-};
-//"zoomType": "x"
-  })
-        .highchartTable();
-  </script>
-
-
 {% endif %}
 
+{% endblock %}
+
+
+{% block bottomjs %}
+    <script>
+        var addressPoints = {{ geo |json_encode()|raw }};
+    </script>
+    <script src="http://code.highcharts.com/highcharts.js"></script>
+    <script src="http://code.highcharttable.org/master/jquery.highchartTable-min.js"></script>
+    <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+    <script src="{{ app.request.basepath }}/js/leaflet.markercluster-src.js"></script>
+    <script src="{{ app.request.basepath }}/js/leaflet-providers.js"></script>
+    <script src='//api.tiles.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v0.0.2/Leaflet.fullscreen.min.js'></script>
+    <script src="{{ app.request.basepath }}/js/stats.js"></script>
+{% endblock %}
+
+{% block headcss %}
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+    <link href='//api.tiles.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v0.0.2/leaflet.fullscreen.css' rel='stylesheet' />
 {% endblock %}

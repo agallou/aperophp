@@ -21,21 +21,13 @@
     <link href="{{ app.request.basepath }}/css/bootstrap-responsive.min.css" rel="stylesheet">
     <link href="{{ app.request.basepath }}/css/jquery-ui.custom.css" rel="stylesheet">
     <link href="{{ app.request.basepath }}/css/app.css" rel="stylesheet">
-<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+
     <!-- Le fav and touch icons -->
     <link rel="shortcut icon" href="images/favicon.ico">
     <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
     <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
     <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
-
-<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
-<script src="http://code.highcharts.com/highcharts.js"></script>
-<script src="http://code.highcharttable.org/master/jquery.highchartTable-min.js"></script> 
-<script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
-<script src="{{ app.request.basepath }}/js/leaflet.markercluster-src.js"></script>
-<script src="{{ app.request.basepath }}/js/leaflet-providers.js"></script>
-
-
+    {% block headcss %}{% endblock %}
 
     <!-- Atom -->
     <link rel = "alternate" type="application/atom+xml" title="Liste des ap&eacute;ros" href = "{{ url('_listdrinks', {'format': 'atom'}) }}"/>
@@ -63,9 +55,12 @@
           </div> <!-- /container -->
       </div> <!-- /main-inner -->
     </div> <!--  /main -->
-    <script src="{{ app.request.basepath }}/js/jquery.min.js"></script>
+    <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
     <script src="{{ app.request.basepath }}/js/jquery-ui.custom.min.js"></script>
     <script src="{{ app.request.basepath }}/js/bootstrap.min.js"></script>
     {% block bottomjs %}{% endblock %}
   </body>
 </html>
+
+
+
